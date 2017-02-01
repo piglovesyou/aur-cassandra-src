@@ -1,4 +1,7 @@
-# Maintainer: Carsten Feuls <archlinux@carstenfeuls.de>
+# Piglovesyou cloned https://aur.archlinux.org/cassandra.git to build Cassandra from source for different architecture.
+
+# Maintainer: piglovesyou <thepiglovesyou@gmail.com>
+# Contributor: Carsten Feuls <archlinux@carstenfeuls.de>
 # Contributor: Guillaume ALAUX <guillaume at alaux dot net>
 # Contributor: Thomas Dziedzic < gostrc at gmail >
 # Contributor: Konstantin Nikiforov <helllamer@gmail.com> 
@@ -9,7 +12,8 @@
 # See http://scarybeastsecurity.blogspot.com/2011/07/alert-vsftpd-download-backdoored.html for reason of this step.
 # If you have problems with gpg, you can remove check() function, and all will be ok.
 
-pkgname=cassandra
+pkgbase=cassandra-src
+pkgname=cassandra-src
 pkgver=3.9
 pkgrel=1
 pkgdesc='Apache Cassandra NoSQL database'
@@ -18,8 +22,8 @@ url='http://cassandra.apache.org/'
 license=('APACHE')
 depends=('java-runtime')
 makedepends=('gnupg')
-checkdepends=('wget')
-optdepends=('python: to use Python CLI administration scripts')
+checkdepends=('wget apache-ant python-sphinx')
+# optdepends=('python: to use Python CLI administration scripts')
 backup=(etc/cassandra/cassandra-env.sh
         etc/cassandra/cassandra-rackdc.properties
         etc/cassandra/cassandra-topology.properties
@@ -28,14 +32,14 @@ backup=(etc/cassandra/cassandra-env.sh
         etc/cassandra/logback.xml
         etc/cassandra/logback-tools.xml)
 install=cassandra.install
-_url_tgz="http://www.apache.org/dist/${pkgname}/${pkgver}/apache-${pkgname}-${pkgver}-bin.tar.gz"
+_url_tgz="http://www.apache.org/dist/cassandra/${pkgver}/apache-cassandra-${pkgver}-src.tar.gz"
 source=("${_url_tgz}"
         '01_fix_cassandra_home_path.patch'
         'cassandra.install'
         'cassandra.service'
         'cassandra-tmpfile.conf'
         'cassandra-user.conf')
-sha256sums=('27cf88a6bce1ee2fb1a1c936094b9200ad844414c2b5b1491ba4991fcc0fd693'
+sha256sums=('3c23771cc32e580ea25599d730e97c92622dce2b12225080fcb955c1cc34053a'
             'bbb5dcc19cac4e19c506210da901280c3063a6a241480bf12bc874e6a5c02657'
             '971d6d0f21963b2d9443039431e5225191771454728c6eda4aab9175ee478ce4'
             'abc9d54399c84eacf5922811b5480846ea1c88a73c5d214ea1db3d20c7c0422a'
@@ -43,7 +47,9 @@ sha256sums=('27cf88a6bce1ee2fb1a1c936094b9200ad844414c2b5b1491ba4991fcc0fd693'
             '7a87a4369ca2c13558fa8733f6abdcf548c63dda8a16790b5bcc20bae597ee91')
 
 build() {
-  cd ${srcdir}/apache-cassandra-${pkgver}
+  cd ${srcdir}/apache-cassandra-${pkgver}-src
+
+  ant release
 
   patch -p0 < ${srcdir}/01_fix_cassandra_home_path.patch
 }
@@ -59,12 +65,12 @@ check() {
 
   # no need to add signature to package dependences
   echo "${_url_tgz}.asc"
-  wget --quiet -O - "${_url_tgz}.asc" | gpg --verify - "apache-${pkgname}-${pkgver}-bin.tar.gz"
+  wget --quiet -O - "${_url_tgz}.asc" | gpg --verify - "apache-cassandra-${pkgver}-src.tar.gz"
   msg2 "Detached GPG signature is valid."
 }
 
 package() {
-  cd ${srcdir}/apache-cassandra-${pkgver}
+  cd ${srcdir}/apache-cassandra-${pkgver}-src
 
   mkdir -p ${pkgdir}/{etc/cassandra,var/log/cassandra}
   mkdir -p ${pkgdir}/{usr/bin,usr/share/cassandra,usr/share/java/cassandra}
