@@ -49,7 +49,7 @@ sha256sums=('3c23771cc32e580ea25599d730e97c92622dce2b12225080fcb955c1cc34053a'
 build() {
   cd ${srcdir}/apache-cassandra-${pkgver}-src
 
-  ant release
+  ant -autoproxy
 
   patch -p0 < ${srcdir}/01_fix_cassandra_home_path.patch
 }
